@@ -31,9 +31,12 @@ const userSchema = new Schema({
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
+  profileImg: {
+    type: String,
+  },
   password: {
     type: String,
-    validate: [...validatePassword],
+    validate: [validatePassword],
   },
 });
 
@@ -46,6 +49,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-const User = mongoose.Model("user", userSchema);
+const User = mongoose.model("user", userSchema);
 
 module.exports = User;
