@@ -49,6 +49,13 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.post(/find$/, function(doc, next) {
+  doc.forEach((file) => {
+    file.password = undefined;
+  });
+  next();
+});
+
 const User = mongoose.model("user", userSchema);
 
 module.exports = User;

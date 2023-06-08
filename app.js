@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const User = require("./models/user");
 const app = express();
 require("dotenv").config();
@@ -29,22 +30,25 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
-  let message = "User not found";
-  console.log(req, res);
   const user = await User.findOne({ email }).catch((err) => console.log(err));
 
   if (user) {
-    const result = await bcrypt.compare(password, user.password).catch(err => console.log(err));
-
+    const result = await bcrypt
+      .compare(password, user.password)
+      .catch((err) => console.log(err));
+    
     if (result) {
-      message = result;
+      res.json({ user });
+    } else {
+      res.json({ error: "Incorrect Password"})
     }
+  } else {
+    res.json({ error: "User not found" });
   }
-
-  res.json({message});
 });
 
 app.post("/auth/signup", async (req, res) => {
@@ -58,15 +62,18 @@ app.post("/auth/signup", async (req, res) => {
     password: req.body.password,
   });
 
-  const email = User.findOne({ email: req.body.email });
-  let response = "User already exists";
+  const result = await User.findOne({ email: req.body.email });
+  // let response = "User already exists";
 
-  if (!email) {
-    response = await user.save().catch((err) => console.log(err));
+  if (!result) {
+    const response = await user.save().catch((err) => console.log(err));
+    console.log("Log", response);
+    response.json({ response });
   }
 
-  console.log(response);
-  res.json({ response });
+  if (result) {
+    res.json({ error: "User already exists" });
+  }
 });
 
 app.use((req, res) => {
