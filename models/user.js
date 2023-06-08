@@ -38,6 +38,14 @@ const userSchema = new Schema({
     type: String,
     validate: [validatePassword],
   },
+  posts: [{
+    type: Schema.Types.ObjectId,
+    ref: "Post"
+  }],
+  comments: [{
+    type: Schema.Types.ObjectId,
+    ref: "Comment"
+  }]
 });
 
 // Hash password before saving

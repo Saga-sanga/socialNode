@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./models/user");
+const Post = require("./models/post");
 const app = express();
 require("dotenv").config();
 
@@ -40,11 +41,11 @@ app.post("/auth/login", async (req, res) => {
     const result = await bcrypt
       .compare(password, user.password)
       .catch((err) => console.log(err));
-    
+
     if (result) {
       res.json({ user });
     } else {
-      res.json({ error: "Incorrect Password"})
+      res.json({ error: "Incorrect Password" });
     }
   } else {
     res.json({ error: "User not found" });
@@ -74,6 +75,13 @@ app.post("/auth/signup", async (req, res) => {
   if (result) {
     res.json({ error: "User already exists" });
   }
+});
+
+app.post("/post/create", async (req, res) => {
+  const post = new Post(req.body);
+
+  const result = await post.save().catch(err => console.log(err))
+  res.json(result);
 });
 
 app.use((req, res) => {
