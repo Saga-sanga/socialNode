@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
+const { Schema, model} = require("mongoose");
 const bcrypt = require("bcrypt");
 const { isEmail, isStrongPassword } = require("validator");
-const Schema = mongoose.Schema;
 
 const validatePassword = {
   validator: function (value) {
@@ -64,6 +63,6 @@ userSchema.post(/find$/, function(doc, next) {
   next();
 });
 
-const User = mongoose.model("user", userSchema);
+const User = model("user", userSchema);
 
 module.exports = User;

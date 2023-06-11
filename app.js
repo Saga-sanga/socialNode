@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const User = require("./models/user");
 const Post = require("./models/post");
@@ -11,6 +12,7 @@ require("dotenv").config();
 
 const port = process.env.PORT || 3020;
 const mongoPassword = process.env.MONGO_PW;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const mongoURI = `mongodb+srv://recksonk94:${mongoPassword}@cluster0.qs9y705.mongodb.net/odinSocials?retryWrites=true&w=majority`;
 
@@ -25,6 +27,19 @@ mongoose
     });
   })
   .catch(console.log);
+
+// Functions
+function createToken(user) {
+  return jwt.sign(
+    {
+      sub: user._id,
+      email: user.email,
+      iat: parseInt(Date.now() / 1000),
+    },
+    JWT_SECRET,
+    { expiresIn: "8h" }
+  );
+}
 
 // Middlewares
 app.use(morgan("dev"));
@@ -43,12 +58,15 @@ app.post("/auth/login", async (req, res) => {
       .catch((err) => console.log(err));
 
     if (result) {
-      res.json({ user });
+      const token = createToken(user);
+      res.status(200).cookie("token", token, {
+        httpOnly: true,
+      });
     } else {
-      res.json({ error: "Incorrect Password" });
+      res.json({ password: "Incorrect Password" });
     }
   } else {
-    res.json({ error: "User not found" });
+    res.json({ email: "Unable to find User" });
   }
 });
 
@@ -68,8 +86,11 @@ app.post("/auth/signup", async (req, res) => {
 
   if (!result) {
     const response = await user.save().catch((err) => console.log(err));
+    const token = createToken(response);
     console.log("Log", response);
-    response.json({ response });
+    res.status(200).cookie("token", token, {
+      httpOnly: true,
+    });
   }
 
   if (result) {
@@ -80,7 +101,7 @@ app.post("/auth/signup", async (req, res) => {
 app.post("/post/create", async (req, res) => {
   const post = new Post(req.body);
 
-  const result = await post.save().catch(err => console.log(err))
+  const result = await post.save().catch((err) => console.log(err));
   res.json(result);
 });
 
