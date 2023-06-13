@@ -1,4 +1,4 @@
-const { Schema, model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 const { isEmail, isStrongPassword } = require("validator");
 
@@ -37,14 +37,24 @@ const userSchema = new Schema({
     type: String,
     validate: [validatePassword],
   },
-  posts: [{
-    type: Schema.Types.ObjectId,
-    ref: "Post"
-  }],
-  comments: [{
-    type: Schema.Types.ObjectId,
-    ref: "Comment"
-  }]
+  posts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
+  friends: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 // Hash password before saving
@@ -56,7 +66,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.post(/find$/, function(doc, next) {
+userSchema.post(/find$/, function (doc, next) {
   doc.forEach((file) => {
     file.password = undefined;
   });

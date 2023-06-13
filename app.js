@@ -41,27 +41,39 @@ function createToken(user) {
   );
 }
 
+const corsOptions = {
+  origin: "*",
+}
+
 // Middlewares
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({corsOptions})
+);
 
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email }).catch((err) => console.log(err));
+  const user = await User.findOne({ email })
+    .lean()
+    .catch((err) => console.log(err));
 
   if (user) {
     const result = await bcrypt
       .compare(password, user.password)
       .catch((err) => console.log(err));
+    delete user.password;
 
     if (result) {
       const token = createToken(user);
-      res.status(200).cookie("token", token, {
-        httpOnly: true,
-      });
+      res
+        .status(200)
+        .cookie("token", token, {
+          httpOnly: true,
+        })
+        .json({ user });
     } else {
       res.json({ password: "Incorrect Password" });
     }
