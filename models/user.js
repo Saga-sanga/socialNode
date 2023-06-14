@@ -15,6 +15,8 @@ const validatePassword = {
   message: "Password is not strong enough",
 };
 
+// Option: Store image in AWS S3 bucket
+
 const userSchema = new Schema({
   name: {
     first: {
@@ -55,6 +57,12 @@ const userSchema = new Schema({
       ref: "User",
     },
   ],
+  likedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post"
+    }
+  ]
 });
 
 // Hash password before saving

@@ -1,20 +1,29 @@
-const { Schema, model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 
-const postSchema = new Schema({
-  content: String,
-  likes: {
-    type: Number,
-    default: 0,
+// Question: How to update an array of items in Mongoose = Array.prototype.toSpliced()
+const postSchema = new Schema(
+  {
+    content: String,
+    image: String,
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: "User"
-  },
-  comments: [{
-    type: Schema.Types.ObjectId,
-    ref: "Comment"
-  }]
-}, {timestamps: true});
+  { timestamps: true }
+);
 
 const Post = model("post", postSchema);
 module.exports = Post;
